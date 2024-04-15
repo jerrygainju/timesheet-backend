@@ -8,6 +8,10 @@ export class ProjectInput {
   @Field({nullable: true})
   ProjectDescription?: string;
 
+  
+  @Field({nullable: true})
+  ClientContact?: string;
+
   @Field(({nullable: true}))
-  ProjectCost?: number;
+  Budget?: number;
 }

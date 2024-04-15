@@ -1,9 +1,10 @@
 import {Field, ID} from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn,PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Projects {
     @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     @Field(() => ID)
     id: string;
 
@@ -17,5 +18,9 @@ export class Projects {
 
     @Column({nullable: true})
     @Field()
-    ProjectCost?: number;
+    ClientContact?: string;
+
+    @Column({nullable: true})
+    @Field()
+    Budget?: number;
 }

@@ -18,7 +18,8 @@ type ProjectOutput {
   id: ID!
   MasterProjectName: String
   ProjectDescription: String
-  ProjectCost: Float
+  ClientContact: String
+  Budget: Float
 }
 
 type Query {
@@ -38,5 +39,6 @@ type Mutation {
 input ProjectInput {
   MasterProjectName: String
   ProjectDescription: String
-  ProjectCost: Float
+  ClientContact: String
+  Budget: Float
 }
