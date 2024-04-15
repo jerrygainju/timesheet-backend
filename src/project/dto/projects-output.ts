@@ -5,8 +5,8 @@ export class ProjectOutput {
   @Field(() => ID)
   id: string;
 
-  @Field({nullable: true})
-  MasterProjectName?: string;
+  @Field()
+  MasterProjectName: string;
 
   @Field({nullable: true})
   ProjectDescription?: string;

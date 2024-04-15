@@ -16,7 +16,7 @@ type Post {
 
 type ProjectOutput {
   id: ID!
-  MasterProjectName: String
+  MasterProjectName: String!
   ProjectDescription: String
   ClientContact: String
   Budget: Float
@@ -37,7 +37,7 @@ type Mutation {
 }
 
 input ProjectInput {
-  MasterProjectName: String
+  MasterProjectName: String!
   ProjectDescription: String
   ClientContact: String
   Budget: Float

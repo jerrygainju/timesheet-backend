@@ -8,9 +8,9 @@ export class Projects {
     @Field(() => ID)
     id: string;
 
-    @Column({nullable: true})
+    @Column()
     @Field()
-    MasterProjectName?: string;
+    MasterProjectName: string;
     
     @Column({nullable: true})
     @Field()
