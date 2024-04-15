@@ -1,0 +1,42 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Author {
+  id: ID!
+  name: String!
+  posts: [Post!]!
+}
+
+type Post {
+  id: ID!
+  title: String!
+  author: Author!
+}
+
+type ProjectOutput {
+  id: ID!
+  MasterProjectName: String
+  ProjectDescription: String
+  ProjectCost: Float
+}
+
+type Query {
+  post: Post!
+  authors: [Author!]!
+  projects: [ProjectOutput!]!
+  project(id: String!): ProjectOutput!
+}
+
+type Mutation {
+  createPost(title: String!, authorId: String!): Post!
+  createAuthor(name: String!): Author!
+  createProject(data: ProjectInput!): ProjectOutput!
+  updateProject(data: ProjectInput!, id: String!): ProjectOutput!
+}
+
+input ProjectInput {
+  MasterProjectName: String
+  ProjectDescription: String
+  ProjectCost: Float
+}
