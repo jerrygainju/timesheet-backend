@@ -3,15 +3,15 @@ import { InputType, Field, Int } from '@nestjs/graphql';
 @InputType()
 export class ProjectInput {
   @Field()
-  MasterProjectName: string;
+  masterProjectName: string;
 
   @Field({nullable: true})
-  ProjectDescription?: string;
+  projectDescription?: string;
 
   
   @Field({nullable: true})
-  ClientContact?: string;
+  clientContact?: string;
 
   @Field(({nullable: true}))
-  Budget?: number;
+  budget?: number;
 }

@@ -13,8 +13,8 @@ export class ProjectService {
   ) {}
 
   async createproject(data: ProjectInput): Promise<ProjectOutput> {
-    const { MasterProjectName } = data;
-    const findProject = await this.projectRepository.findOne({ where: { MasterProjectName } });
+    const { masterProjectName } = data;
+    const findProject = await this.projectRepository.findOne({ where: { masterProjectName } });
 
     if (findProject) {
       throw new Error('Project already exists');

@@ -1,5 +1,29 @@
 import {Field, ID} from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn,PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn,PrimaryColumn, OneToMany } from 'typeorm';
+
+@Entity()
+export class UnitProject {
+    @PrimaryGeneratedColumn('uuid')
+    @Field(() => ID)
+    id: string;
+
+    @Column()
+    @Field()
+    unitProjectName: string;
+    
+    @Column({nullable: true})
+    @Field()
+    aoContact?: string;
+
+       
+    @Column({nullable: true})
+    @Field()
+    rpsContact?: string;
+
+    @Column({nullable: true})
+    @Field()
+    unitBudget?: number;
+}
 
 @Entity()
 export class Projects {
@@ -10,17 +34,21 @@ export class Projects {
 
     @Column()
     @Field()
-    MasterProjectName: string;
+    masterProjectName: string;
     
     @Column({nullable: true})
     @Field()
-    ProjectDescription?: string;
+    projectDescription?: string;
 
     @Column({nullable: true})
     @Field()
-    ClientContact?: string;
+    clientContact?: string;
 
     @Column({nullable: true})
     @Field()
-    Budget?: number;
+    budget?: number;
+
+    @OneToMany(() => UnitProject, unitProject => unitProject.unitProjectName)
+    @Field(() => [UnitProject])
+    unitProject?: UnitProject[];
 }

@@ -6,14 +6,14 @@ export class ProjectOutput {
   id: string;
 
   @Field()
-  MasterProjectName: string;
+  masterProjectName: string;
 
   @Field({nullable: true})
-  ProjectDescription?: string;
+  projectDescription?: string;
 
   @Field({nullable: true})
-  ClientContact?: string;
+  clientContact?: string;
 
   @Field(({nullable: true}))
-  Budget?: number;
+  budget?: number;
 }

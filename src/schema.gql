@@ -16,10 +16,10 @@ type Post {
 
 type ProjectOutput {
   id: ID!
-  MasterProjectName: String!
-  ProjectDescription: String
-  ClientContact: String
-  Budget: Float
+  masterProjectName: String!
+  projectDescription: String
+  clientContact: String
+  budget: Float
 }
 
 type Query {
@@ -37,8 +37,8 @@ type Mutation {
 }
 
 input ProjectInput {
-  MasterProjectName: String!
-  ProjectDescription: String
-  ClientContact: String
-  Budget: Float
+  masterProjectName: String!
+  projectDescription: String
+  clientContact: String
+  budget: Float
 }
