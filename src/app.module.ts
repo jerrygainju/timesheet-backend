@@ -8,12 +8,14 @@ import { join } from 'path';
 import { PostsModule } from './post/posts.module'
 import { AuthorsModule } from './authors/authors.module'
 import { ProjectModule } from './project/projects.module'
+import { SignupModule } from './auth/signup.module'
 
 @Module({
   imports: [
     PostsModule,
     AuthorsModule,
     ProjectModule,
+    SignupModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

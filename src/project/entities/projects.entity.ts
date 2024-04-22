@@ -48,7 +48,7 @@ export class Projects {
     @Field()
     budget?: number;
 
-    @OneToMany(() => UnitProject, unitProject => unitProject.unitProjectName)
+    @OneToMany(() => UnitProject, unitProject => unitProject.id)
     @Field(() => [UnitProject])
     unitProject?: UnitProject[];
 }

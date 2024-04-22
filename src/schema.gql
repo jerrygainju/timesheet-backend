@@ -22,6 +22,18 @@ type ProjectOutput {
   budget: Float
 }
 
+type Signup {
+  id: ID!
+  username: String!
+  email: String!
+  password: String!
+  resetToken: String!
+}
+
+type ResetPasswordResponse {
+  token: String
+}
+
 type Query {
   post: Post!
   authors: [Author!]!
@@ -34,6 +46,10 @@ type Mutation {
   createAuthor(name: String!): Author!
   createProject(data: ProjectInput!): ProjectOutput!
   updateProject(data: ProjectInput!, id: String!): ProjectOutput!
+  signUp(input: SignupInput!): Signup!
+  signIn(input: SigninInput!): String!
+  requestTokenPassword(email: String!): String!
+  resetPassword(newPassword: String!, confirmPassword: String!): ResetPasswordResponse!
 }
 
 input ProjectInput {
@@ -41,4 +57,16 @@ input ProjectInput {
   projectDescription: String
   clientContact: String
   budget: Float
+}
+
+input SignupInput {
+  username: String
+  email: String!
+  password: String!
+  confirmPassword: String!
+}
+
+input SigninInput {
+  email: String!
+  password: String!
 }
