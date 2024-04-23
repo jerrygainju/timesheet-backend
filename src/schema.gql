@@ -14,12 +14,29 @@ type Post {
   author: Author!
 }
 
+type Projects {
+  masterProjectId: ID!
+  role: String!
+  masterProjectName: String!
+  projectDescription: String!
+  clientContact: String!
+  masterProjectBudget: Float!
+}
+
 type ProjectOutput {
-  id: ID!
+  masterProjectId: ID!
+  role: UserRole!
   masterProjectName: String!
   projectDescription: String
   clientContact: String
-  budget: Float
+  masterProjectBudget: Float
+}
+
+enum UserRole {
+  superAdmin
+  masterAdmin
+  unitAdmin
+  normalAdmin
 }
 
 type Signup {
@@ -34,11 +51,20 @@ type ResetPasswordResponse {
   token: String
 }
 
+type Client {
+  clientId: ID!
+  clientName: String!
+  clientContact: String!
+  projectList: [Projects!]
+}
+
 type Query {
   post: Post!
   authors: [Author!]!
   projects: [ProjectOutput!]!
   project(id: String!): ProjectOutput!
+  clients: [Client!]!
+  client(clientId: String!): Client!
 }
 
 type Mutation {
@@ -50,13 +76,17 @@ type Mutation {
   signIn(input: SigninInput!): String!
   requestTokenPassword(email: String!): String!
   resetPassword(newPassword: String!, confirmPassword: String!): ResetPasswordResponse!
+  createClient(clientInput: ClientInput!): Client!
+  updateClient(clientId: String!, clientInput: ClientInput!): Client!
+  removeClient(clientId: String!): Boolean!
 }
 
 input ProjectInput {
   masterProjectName: String!
+  role: UserRole!
   projectDescription: String
   clientContact: String
-  budget: Float
+  masterProjectBudget: Float
 }
 
 input SignupInput {
@@ -69,4 +99,10 @@ input SignupInput {
 input SigninInput {
   email: String!
   password: String!
+}
+
+input ClientInput {
+  clientName: String
+  clientContact: String
+  projectList: [ProjectInput!]
 }

@@ -23,24 +23,32 @@ export class ProjectService {
     return this.projectRepository.save(project);
   }
 
+
+//   async createProject(input: ProjectInput): Promise<Client> {
+//     const masterProject = await this.projectRepository.create(input.masterProjectId);
+//     const client = await this.clientRepository.findOne(input.clientId);
+//     client.projectList = [...(client.projectList || []), masterProject.id];
+//     return this.clientRepository.save(client);
+// }
+
   async findAll(): Promise<ProjectOutput[]> {
     return this.projectRepository.find();
   }
-  async findOne(id: string): Promise<ProjectOutput> {
-    const project = await this.projectRepository.findOne({ where: { id } });
+
+  async findOne(masterProjectId: string): Promise<ProjectOutput> {
+    const project = await this.projectRepository.findOne({ where: { masterProjectId } });
     if (!project) {
       throw new Error('Project not found');
     }
     return project;
   }
 
-  async updateProject(data: ProjectInput, id: string): Promise<ProjectOutput> {
-    const project = await this.projectRepository.findOne({ where: { id } });
+  async updateProject(data: ProjectInput, masterProjectId: string): Promise<ProjectOutput> {
+    const project = await this.projectRepository.findOne({ where: { masterProjectId } });
     if (!project) {
       throw new Error('Project not found');
     }
     const updatedProject = Object.assign(project, data);
     return this.projectRepository.save(updatedProject);
-  
 }
 }

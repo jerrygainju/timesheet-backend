@@ -1,36 +1,19 @@
-import {Field, ID} from '@nestjs/graphql';
+import {Field, ID, ObjectType} from '@nestjs/graphql';
+import { UserRole } from 'src/common/role';
 import { Column, Entity, PrimaryGeneratedColumn,PrimaryColumn, OneToMany } from 'typeorm';
 
-@Entity()
-export class UnitProject {
-    @PrimaryGeneratedColumn('uuid')
-    @Field(() => ID)
-    id: string;
-
-    @Column()
-    @Field()
-    unitProjectName: string;
-    
-    @Column({nullable: true})
-    @Field()
-    aoContact?: string;
-
-       
-    @Column({nullable: true})
-    @Field()
-    rpsContact?: string;
-
-    @Column({nullable: true})
-    @Field()
-    unitBudget?: number;
-}
 
 @Entity()
+@ObjectType()
 export class Projects {
     @PrimaryGeneratedColumn('uuid')
     @PrimaryColumn('uuid')
     @Field(() => ID)
-    id: string;
+    masterProjectId: string;
+
+    @Column({type: 'enum', enum: UserRole})
+    @Field()
+    role?: UserRole;
 
     @Column()
     @Field()
@@ -46,9 +29,9 @@ export class Projects {
 
     @Column({nullable: true})
     @Field()
-    budget?: number;
+    masterProjectBudget?: number;
 
-    @OneToMany(() => UnitProject, unitProject => unitProject.id)
-    @Field(() => [UnitProject])
-    unitProject?: UnitProject[];
+    // @OneToMany(() => UnitProject, unitProject => unitProject.id)
+    // @Field(() => [UnitProject])
+    // unitProject?: UnitProject[];
 }

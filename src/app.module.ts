@@ -9,6 +9,7 @@ import { PostsModule } from './post/posts.module'
 import { AuthorsModule } from './authors/authors.module'
 import { ProjectModule } from './project/projects.module'
 import { SignupModule } from './auth/signup.module'
+import { ClientModule } from './client/clinet.module'
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SignupModule } from './auth/signup.module'
     AuthorsModule,
     ProjectModule,
     SignupModule,
+    ClientModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

@@ -1,9 +1,13 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { UserRole } from 'src/common/role';
 
 @ObjectType()
 export class ProjectOutput {
   @Field(() => ID)
-  id: string;
+  masterProjectId: string;
+
+  @Field(() => UserRole)
+  role?: UserRole;
 
   @Field()
   masterProjectName: string;
@@ -15,5 +19,5 @@ export class ProjectOutput {
   clientContact?: string;
 
   @Field(({nullable: true}))
-  budget?: number;
+  masterProjectBudget?: number;
 }
