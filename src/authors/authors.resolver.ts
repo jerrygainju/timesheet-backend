@@ -11,7 +11,7 @@ export class AuthorsResolver {
   authors() {
     return this.authorsService.findAll();
   }
-
+  
   @Mutation(() => Author)
   createAuthor(@Args('name') name: string) {
     return this.authorsService.create(name);

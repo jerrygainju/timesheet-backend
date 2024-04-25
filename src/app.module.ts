@@ -8,16 +8,18 @@ import { join } from 'path';
 import { PostsModule } from './post/posts.module'
 import { AuthorsModule } from './authors/authors.module'
 import { ProjectModule } from './project/projects.module'
-import { SignupModule } from './auth/signup.module'
+// import { UserModule } from './users/user.module'
 import { ClientModule } from './client/clinet.module'
+import { AuthModule } from './users/auth/auth.module'
 
 @Module({
   imports: [
     PostsModule,
     AuthorsModule,
     ProjectModule,
-    SignupModule,
+    // UserModule,
     ClientModule,
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -27,6 +29,7 @@ import { ClientModule } from './client/clinet.module'
       database: 'timesheet',
       entities: ['dist/**/*.entity.{ts,js}'],
       synchronize: true,
+      
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

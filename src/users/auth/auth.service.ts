@@ -1,21 +1,32 @@
 import { Injectable, HttpException, HttpStatus, Headers } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { Signup } from './entities/signup.entity';
-import { SignupInput } from './dto/sighnup-dto'
-import { SigninInput } from './dto/signin-dto';
-import { validateEmail, validatePassword, validateSignInInput } from '../validations/singup-validation.helper';
+import { User } from '../entities/user.entity';
+import { SigninInput } from '../dto/signin-dto';
+import { SignupInput } from '../dto/sighnup-dto';
+import { validateEmail, validatePassword, validatePasswordMatch, validateSignInInput } from 'src/validations/singup-validation.helper';
 import * as jwt from 'jsonwebtoken';
-import ErrorMessage from '../common/error-message';
+import ErrorMessage from 'src/common/error-message';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ResetPasswordResponse } from './dto/resetToken-dto';
+import { ResetPasswordResponse } from '../dto/resetToken-dto';
 
 @Injectable()
-export class SignupService {
+export class AuthService {
   constructor(
-    @InjectRepository(Signup) private readonly userRepository: Repository<Signup>) {}
+    @InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
-   async signUp(signUpInput: SignupInput): Promise<Signup> {
+    async validateUser(email: string, password: string): Promise<User | null> {
+        const user = await this.userRepository.findOne({ where: { email } });
+        if (user) {
+          const passwordMatch = await bcrypt.compare(password, user.password);
+          if (passwordMatch) {
+            return user;
+          }
+        }
+        return null;
+      }
+      
+   async signUp(signUpInput: SignupInput): Promise<User> {
     try {
       const { username, email, password, confirmPassword } = signUpInput;
 
@@ -47,7 +58,7 @@ export class SignupService {
         password: encryptPassword,
       };
       
-      const newUser = new Signup();
+      const newUser = new User();
       newUser.username = username;
       newUser.email = email.toLowerCase();
       newUser.password = encryptPassword;
@@ -69,43 +80,43 @@ export class SignupService {
     }
   }
 
-  async signIn(signInInput: SigninInput): Promise<{token: string}> {
-    try {
-      const { email, password } = signInInput;
-      validateSignInInput(email, password);
-      const user = await this.userRepository.findOne({ where: { email } });
-      if (!user) {
-        throw new HttpException(
-           ErrorMessage.EMAIL_NOT_FOUND ,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (!passwordMatch) {
-        throw new HttpException(
-          ErrorMessage.PASSWORD_INCORRECT,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      
-      const secretKey = process.env.SECRET_KEY || 'default_secret_key';
-      const token = jwt.sign({ userId: user.id, email }, secretKey); 
-      return token;
-      
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-
-      console.error(error);
-
+  async signIn(signInInput: SigninInput): Promise<{ token: string }> {
+  try {
+    const { email, password } = signInInput;
+    validateSignInInput(email, password);
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
       throw new HttpException(
-        { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal Server Error' },
-        HttpStatus.INTERNAL_SERVER_ERROR,
+         ErrorMessage.EMAIL_NOT_FOUND ,
+        HttpStatus.BAD_REQUEST,
       );
     }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      throw new HttpException(
+        ErrorMessage.PASSWORD_INCORRECT,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    
+    const secretKey = process.env.SECRET_KEY || 'default_secret_key';
+    const token = jwt.sign({ userId: user.id, email }, secretKey); 
+    return  token 
+    
+  } catch (error) {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+
+    console.error(error);
+
+    throw new HttpException(
+      { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal Server Error' },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
+}
 
   async resetTokenPassword(email: string): Promise<{email: string, token:string}> {
     try {
