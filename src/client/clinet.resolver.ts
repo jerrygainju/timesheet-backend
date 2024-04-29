@@ -16,7 +16,7 @@ export class ClientResolver {
   async client(@Args('clientId') clientId: string): Promise<Client> {
     return this.clientService.findOne(clientId);
   }
-
+  
   @Mutation(() => Client)
   async createClient(@Args('clientInput') clientInput: ClientInput): Promise<Client> {
     return this.clientService.create(clientInput);

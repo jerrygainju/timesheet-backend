@@ -1,32 +1,55 @@
-import { Injectable, HttpException, HttpStatus, Headers } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { User } from '../entities/user.entity';
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import { UserService } from '../user.service';
+import { JwtService } from '@nestjs/jwt';
 import { SigninInput } from '../dto/signin-dto';
 import { SignupInput } from '../dto/sighnup-dto';
-import { validateEmail, validatePassword, validatePasswordMatch, validateSignInInput } from 'src/validations/singup-validation.helper';
-import * as jwt from 'jsonwebtoken';
-import ErrorMessage from 'src/common/error-message';
+import { BcryptService } from '../../common/modules/bcrypt/bcrypt.service'
+import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ResetPasswordResponse } from '../dto/resetToken-dto';
+import ErrorMessage from 'src/common/error-message';
+import { validateEmail, validatePassword } from 'src/validations/singup-validation.helper';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>) {}
+    private userService: UserService,
+    private jwtService: JwtService,
+    private bcryptService: BcryptService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-    async validateUser(email: string, password: string): Promise<User | null> {
-        const user = await this.userRepository.findOne({ where: { email } });
-        if (user) {
-          const passwordMatch = await bcrypt.compare(password, user.password);
-          if (passwordMatch) {
-            return user;
-          }
-        }
-        return null;
-      }
-      
-   async signUp(signUpInput: SignupInput): Promise<User> {
+  async validateUser(loginUserDto: SigninInput) {
+    const user = await this.userService.findOne(loginUserDto.email.toLowerCase())
+    if (!user) {
+      throw { message: 'Email not found', statusCode: HttpStatus.NOT_FOUND };
+    }
+
+    const passwordMatch = await this.bcryptService.comparePassword(loginUserDto.password, user.password);
+    if (passwordMatch) {
+      return { message: 'Authentication successful', statusCode: HttpStatus.OK };
+    } else {
+      throw { message: 'Incorrect password', statusCode: HttpStatus.UNAUTHORIZED };
+    }
+  }
+
+  async login(loginUserDto: SigninInput) {    
+    try {
+      await this.validateUser(loginUserDto);
+      const payload = { email: loginUserDto.email };
+      return {
+        access_token: this.jwtService.sign(payload),
+        message: 'Authentication successful',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      console.log(error, 'check error');
+      throw { message: error.message, statusCode: error.statusCode };
+    }
+  }
+
+  async signUp(signUpInput: SignupInput): Promise<User> {
     try {
       const { username, email, password, confirmPassword } = signUpInput;
 
@@ -42,7 +65,7 @@ export class AuthService {
         throw new HttpException(ErrorMessage.INVALID_EMAIL, HttpStatus.BAD_REQUEST);
       }
 
-      const existingEmail = await this.userRepository.findOne({ where: { email } });
+      const existingEmail = await this.userRepository.findOne({ where: { email:email.toLowerCase()  } });
       if (existingEmail) {
         throw new HttpException(ErrorMessage.EMAIL_EXISTS, HttpStatus.BAD_REQUEST);
       }
@@ -51,13 +74,7 @@ export class AuthService {
         throw new HttpException(ErrorMessage.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
       }
       
-      const encryptPassword = await bcrypt.hash(password, 10);
-      const user = {
-        username: username,
-        email: email.toLowerCase(),
-        password: encryptPassword,
-      };
-      
+      const encryptPassword = await this.bcryptService.hashingPassword(password);   
       const newUser = new User();
       newUser.username = username;
       newUser.email = email.toLowerCase();
@@ -78,122 +95,5 @@ export class AuthService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  }
-
-  async signIn(signInInput: SigninInput): Promise<{ token: string }> {
-  try {
-    const { email, password } = signInInput;
-    validateSignInInput(email, password);
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) {
-      throw new HttpException(
-         ErrorMessage.EMAIL_NOT_FOUND ,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) {
-      throw new HttpException(
-        ErrorMessage.PASSWORD_INCORRECT,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    
-    const secretKey = process.env.SECRET_KEY || 'default_secret_key';
-    const token = jwt.sign({ userId: user.id, email }, secretKey); 
-    return  token 
-    
-  } catch (error) {
-    if (error instanceof HttpException) {
-      throw error;
-    }
-
-    console.error(error);
-
-    throw new HttpException(
-      { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal Server Error' },
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
-  }
-}
-
-  async resetTokenPassword(email: string): Promise<{email: string, token:string}> {
-    try {
-      if(!email){
-        throw new HttpException(
-          { statusCode: HttpStatus.BAD_REQUEST, message: ErrorMessage.FILL_ALL_DATA },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      const user = await this.userRepository.findOne({ where: { email } });
-      if (!user) {
-        throw new HttpException(
-          { statusCode: HttpStatus.BAD_REQUEST, message: ErrorMessage.EMAIL_NOT_FOUND },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      
-      const resetToken = jwt.sign({ userId: user.id }, process.env.SECRECT_KEY || 'default_secret_key', { expiresIn: '1h' });
-      
-      user.resetToken = resetToken;
-      await this.userRepository.save(user);
-    
-      return {email, token: resetToken };
-    } catch (error) {
-      console.error('Error in resetTokenPassword:', error);
-    
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal Server Error', error },
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    }
-    
-  }
-
-
-async resetPassword(@Headers('resettoken') resetToken: string, newPassword: string, confirmPassword: string): Promise<ResetPasswordResponse> {
-  try {
-    if (!resetToken) {
-      throw new HttpException(
-        ErrorMessage.INVALID_RESET_TOKEN,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if(newPassword !== confirmPassword)
-      {
-      throw new HttpException(ErrorMessage.PASSWORD_MISMATCH, HttpStatus.BAD_REQUEST);
-    }
-    if (!validatePassword(newPassword)) {
-      throw new HttpException(ErrorMessage.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
-    }
-    const decodedToken: any = jwt.verify(resetToken, process.env.SECRECT_KEY || 'default_secret_key' );
-    const user = await this.userRepository.findOne({ where: { id: decodedToken.userId } });
-    if (!user) {
-      throw new HttpException(ErrorMessage.INVALID_RESET_TOKEN, HttpStatus.BAD_REQUEST);
-    }
-    user.password = await bcrypt.hash(newPassword, 10);
-    user.resetToken = undefined;
-    await this.userRepository.save(user);
-    const showUser = {
-      newPassword:user.password,
-      token:user.resetToken
-    }
-    return showUser
-  } catch (error) {
-    console.error(error); 
-    if (error instanceof HttpException) {
-       throw error;
-    } else {
-       throw new HttpException(
-         { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal Server Error', error },
-         HttpStatus.INTERNAL_SERVER_ERROR,
-       );
-    }
-   }
   }
 }

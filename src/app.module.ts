@@ -5,19 +5,15 @@ import { AppService } from './app.service'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo'
 import { join } from 'path';
-import { PostsModule } from './post/posts.module'
-import { AuthorsModule } from './authors/authors.module'
 import { ProjectModule } from './project/projects.module'
-// import { UserModule } from './users/user.module'
+import { UserModule } from './users/user.module'
 import { ClientModule } from './client/clinet.module'
 import { AuthModule } from './users/auth/auth.module'
 
 @Module({
   imports: [
-    PostsModule,
-    AuthorsModule,
     ProjectModule,
-    // UserModule,
+    UserModule,
     ClientModule,
     AuthModule,
     TypeOrmModule.forRoot({

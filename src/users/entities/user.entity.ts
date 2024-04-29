@@ -8,7 +8,7 @@ export class User {
     @Field(() => ID)
     id: string;
 
-    @Column()
+    @Column({nullable: true})
     @Field()
     username: string;
 

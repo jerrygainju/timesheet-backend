@@ -2,18 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Author {
-  id: ID!
-  name: String!
-  posts: [Post!]!
-}
-
-type Post {
-  id: ID!
-  title: String!
-  author: Author!
-}
-
 type Projects {
   masterProjectId: ID!
   role: String!
@@ -39,13 +27,6 @@ enum UserRole {
   normalAdmin
 }
 
-type Client {
-  clientId: ID!
-  clientName: String!
-  clientContact: String!
-  projectList: [Projects!]
-}
-
 type User {
   id: ID!
   username: String!
@@ -54,31 +35,41 @@ type User {
   resetToken: String!
 }
 
-type ResetPasswordResponse {
-  token: String
+type Client {
+  clientId: ID!
+  clientName: String!
+  clientContact: String!
+  projectList: [Projects!]
+}
+
+type Author {
+  id: ID!
+  name: String!
+  posts: [Post!]!
+}
+
+type Post {
+  id: ID!
+  title: String!
+  author: Author!
 }
 
 type Query {
-  post: Post!
-  authors: [Author!]!
   projects: [ProjectOutput!]!
   project(id: String!): ProjectOutput!
+  user(id: String!): String!
   clients: [Client!]!
   client(clientId: String!): Client!
 }
 
 type Mutation {
-  createPost(title: String!, authorId: String!): Post!
-  createAuthor(name: String!): Author!
   createProject(data: ProjectInput!): ProjectOutput!
   updateProject(data: ProjectInput!, id: String!): ProjectOutput!
   createClient(clientInput: ClientInput!): Client!
   updateClient(clientId: String!, clientInput: ClientInput!): Client!
   removeClient(clientId: String!): Boolean!
-  signUp(input: SignupInput!): User!
-  signIn(input: SigninInput!): String!
-  requestTokenPassword(email: String!): String!
-  resetPassword(newPassword: String!, confirmPassword: String!): ResetPasswordResponse!
+  signIn(signInInput: SigninInput!): String!
+  signUp(signUpInput: SignupInput!): User!
 }
 
 input ProjectInput {
@@ -95,14 +86,14 @@ input ClientInput {
   projectList: [ProjectInput!]
 }
 
+input SigninInput {
+  email: String!
+  password: String!
+}
+
 input SignupInput {
   username: String
   email: String!
   password: String!
   confirmPassword: String!
-}
-
-input SigninInput {
-  email: String!
-  password: String!
 }
